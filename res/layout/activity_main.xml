@@ -10,9 +10,23 @@
 
     <ListView
         android:id="@+id/deviceList"
+        android:layout_width="150dp"
+        android:layout_height="100dp" />
+    
+    <ListView
+        android:id="@+id/messageList"
+        android:layout_width="150dp"
+        android:layout_height="100dp"
+        android:layout_below="@+id/deviceList"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="125dp" />
+    
+    <ListView
+        android:id="@+id/statusList"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toLeftOf="@+id/buttonServer" />
+        android:layout_height="125dp"
+        android:layout_alignParentBottom="true"
+         />
     
     <Button
         android:id="@+id/buttonServer"
@@ -32,5 +46,22 @@
         android:layout_alignParentTop="true"
         android:layout_marginTop="25dp"
         android:text="Client" />
+
+    <Button
+        android:id="@+id/buttonMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/buttonServer"
+        android:layout_toRightOf="@+id/messageList"
+        android:text="Check Messages" />
+    
+    <Button
+        android:id="@+id/buttonSend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/buttonMessage"
+        android:layout_toRightOf="@+id/messageList"
+        android:text="Send Message" />
+    
 
 </RelativeLayout>
