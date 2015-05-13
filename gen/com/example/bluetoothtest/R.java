@@ -1924,7 +1924,7 @@ containing a value of this type.
         public static final int beginning=0x7f050017;
         public static final int buttonFetch=0x7f050051;
         public static final int buttonPanel=0x7f050036;
-        public static final int buttonSend=0x7f050052;
+        public static final int buttonSend=0x7f050053;
         public static final int checkbox=0x7f050038;
         public static final int collapseActionView=0x7f050014;
         public static final int contentPanel=0x7f050031;
@@ -1946,7 +1946,7 @@ containing a value of this type.
         public static final int image=0x7f050028;
         public static final int listMode=0x7f050002;
         public static final int list_item=0x7f05002a;
-        public static final int messagesList=0x7f050053;
+        public static final int messagesList=0x7f050052;
         public static final int middle=0x7f050018;
         public static final int multiply=0x7f05000e;
         public static final int never=0x7f050010;

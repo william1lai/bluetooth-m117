@@ -44,16 +44,14 @@ public class BluetoothMessage extends Activity
 	public int dataPackets;
 		
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		
+	protected void onCreate(Bundle savedInstanceState)
+	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.message_bluetooth);
-		
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		
 		//actionBar = getActionBar();
 		
-		// reset variables
 		sendingData = false;
 		expectingData = false;
 		outputStream = null;
@@ -78,42 +76,38 @@ public class BluetoothMessage extends Activity
 	}
 	
 	@Override
-	protected void onNewIntent(Intent intent) {
+	protected void onNewIntent(Intent intent)
+	{
 		  super.onNewIntent(intent);
 		  
-		  // set getIntent() to return this new intent
 		  setIntent(intent);
 		  Intent currIntent= getIntent();
-		  
 		  Bundle extras = currIntent.getExtras();
 		  
-		  if(extras!=null)
+		  if (extras != null)
 		  {
 			  String source = currIntent.getExtras().getString("source");
 			  byte[] bytes = currIntent.getExtras().getByteArray("buf");
 			  
-			  // write message
 			  String writeMessage = new String(bytes);
 			  
-			  // read message:
 			  int size = currIntent.getExtras().getInt("size");
 			  String message = new String(bytes, 0, size);
 			  
 			  // if a message was generated...
-			  if(source!=null && (message!=null || writeMessage!=null)) {
-				  
-				  // writing own messages to array adapter
-				  if(source.equals("Me"))
+			  if (source != null && (message != null || writeMessage != null))
+			  {
+				  if (source.equals("Me"))
 				  {  
-					  if(writeMessage.contains(HEADER_START))
+					  if (writeMessage.contains(HEADER_START))
 					  {
 						  sendingData = true;
 					  }
-					  else if(writeMessage.contains(HEADER_END))
+					  else if (writeMessage.contains(HEADER_END))
 					  {
 						  sendingData = false;
 					  }
-					  else if(sendingData)
+					  else if (sendingData)
 					  {
 						  // do nothing; you're automatically transmitting some data or file
 					  }
@@ -124,8 +118,8 @@ public class BluetoothMessage extends Activity
 					  }
 				  }
 				  // reading received messages to array adapter
-				  else {
-					  
+				  else
+				  {
 					  if (!expectingData && message.contains(HEADER_START))
 					  {
 						  //received wrapper beginning, no data expected yet
@@ -134,16 +128,14 @@ public class BluetoothMessage extends Activity
 						  expectingData = true;
 						  outputStream = new ByteArrayOutputStream();
 					  }
-					  else if(expectingData && message.contains(HEADER_END))
+					  else if (expectingData && message.contains(HEADER_END))
 					  {
 						  //received wrapper ending, closing expected data
 						  Log.d("FOOTER", message);
 						  Log.d("DATAPACKETS", ""+dataPackets);
 						  dataPackets = 0;
-						  
 						  msgAdapter.add(outputStream.toString());
 						  
-						  // reset variables
 						  expectingData = false;
 						  if (outputStream!=null)
 						  {
@@ -243,7 +235,7 @@ public class BluetoothMessage extends Activity
 	public void onDestroy()
     {
 		super.onDestroy();
-		if(myConnection.getState()==BluetoothConnection.STATE_CONNECTED)
+		if (myConnection.getState() == BluetoothConnection.STATE_CONNECTED)
 		{
 			myConnection.endConnection();
 		}

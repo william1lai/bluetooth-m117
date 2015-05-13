@@ -30,8 +30,8 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 // Bluetooth implementation based on http://examples.javacodegeeks.com/android/core/bluetooth/bluetoothadapter/android-bluetooth-example/
-public class MainActivity extends Activity {
-	
+public class MainActivity extends Activity
+{
 	// HANDLER MESSAGE TYPES
 	public static final int MESSAGE_STATE_CHANGE = 1;
 	public static final int MESSAGE_READ = 2;
@@ -80,10 +80,7 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		
-		// grab preferences and saved variables
 		preferences = PreferenceManager.getDefaultSharedPreferences(this);
-		
 		adapter = BluetoothAdapter.getDefaultAdapter();
 		
 		if (adapter == null)
@@ -192,12 +189,12 @@ public class MainActivity extends Activity {
 	
 	protected void setupConnection(View v, int position, ArrayAdapter<String> arrayAdapter)
 	{
-		// obtain mac address of clicked device
+		// obtain MAC address of clicked device
 		String deviceDescriptor = arrayAdapter.getItem(position);
 		int length = deviceDescriptor.length();
 		String mac = deviceDescriptor.substring(length-17, length);
 		
-		// reconstruct device using mac address
+		// reconstruct device using MAC address
 		BluetoothDevice device = adapter.getRemoteDevice(mac);
 		setDevice(device);
 		
