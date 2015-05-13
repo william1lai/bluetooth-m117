@@ -6,29 +6,15 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.bluetoothtest.MainActivity" >
+    tools:context="com.example.bluetoothtest.BluetoothMessage" >
 
     <ListView
-        android:id="@+id/pairedDeviceList"
+        android:id="@+id/messagesList"
         android:layout_width="wrap_content"
-        android:layout_height="125dp" />
-    
-    <ListView
-        android:id="@+id/otherDeviceList"
-        android:layout_width="wrap_content"
-        android:layout_height="100dp"
-        android:layout_below="@+id/pairedDeviceList"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="135dp" />
+        android:layout_height="350dp"
+        android:layout_alignParentBottom="true"
+         />
 
-    <Button
-        android:id="@+id/buttonFetch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/otherDeviceList"
-        android:layout_marginTop="10dp"
-        android:text="Fetch Devices" />
-    
     <Button
         android:id="@+id/buttonSend"
         android:layout_width="wrap_content"

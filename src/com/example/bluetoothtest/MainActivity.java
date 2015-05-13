@@ -1,394 +1,426 @@
-
 package com.example.bluetoothtest;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Set;
 
-import com.example.bluetoothtest.R;
-import android.support.v7.app.*;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothServerSocket;
-import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
-@SuppressWarnings("deprecation")
-public class MainActivity extends ActionBarActivity
-{
-	public static final java.util.UUID MY_UUID
-    = java.util.UUID.fromString("00000000-0000-1000-8000-00805F9B34FB");
-
-	int MESSAGE_READ = 16;
-	int REQUEST_ENABLE_BT = 1;
+// Bluetooth implementation based on http://examples.javacodegeeks.com/android/core/bluetooth/bluetoothadapter/android-bluetooth-example/
+public class MainActivity extends Activity {
 	
-	ArrayList<String> devices = new ArrayList<String>();
-	ArrayAdapter<String> devAdapter;	
-	ArrayList<String> messages = new ArrayList<String>();
-	ArrayAdapter<String> msgAdapter;	
-	ArrayList<String> statuses = new ArrayList<String>();
-	ArrayAdapter<String> sAdapter;
+	// HANDLER MESSAGE TYPES
+	public static final int MESSAGE_STATE_CHANGE = 1;
+	public static final int MESSAGE_READ = 2;
+	public static final int MESSAGE_WRITE = 3;
+	public static final int MESSAGE_DEVICE_NAME = 4;
+	public static final int MESSAGE_TOAST = 5;
 	
-	BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-	BluetoothDevice test;
-	Handler mHandler;
-	ConnectedThread bThread;
-	boolean connected = false;
+	// REQUEST CODES
+	private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
+    private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
+    private static final int REQUEST_ENABLE_BT = 3;
+    
+    // HANDLER KEY NAMES
+    public static final String DEVICE_NAME = "device_name";
+    public static final String TOAST = "toast";
+    public static String EXTRA_DEVICE_ADDRESS = "device_address";
+    
+	// VIEW AND LAYOUT
+    private Button buttonFetch;
+	private Button buttonSend;
 	
-	// Create a BroadcastReceiver for ACTION_FOUND
-	private final BroadcastReceiver mReceiver = new BroadcastReceiver()
-	{
-		public void onReceive(Context context, Intent intent)
-	    {
-	        String action = intent.getAction();
-	        // When discovery finds a device
-	        if (BluetoothDevice.ACTION_FOUND.equals(action))
-	        {
-	            // Get the BluetoothDevice object from the Intent
-	            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-	            test = device;
-	            // Add the name and address to an array adapter to show in a ListView
-	            devices.add(device.getName() + "\n" + device.getAddress());
-	            devAdapter.notifyDataSetChanged();
-	        }	        
-	    }
-	};
-
+	// COMMUNICATION VARIABLES
+	private BluetoothConnection connection;
+	private String mConnectedDeviceName = null;
+	private StringBuffer mOutStringBuffer;
+	
+	private ArrayList<String> pairedDevices = new ArrayList<String>();
+	private ArrayList<String> otherDevices = new ArrayList<String>();
+	//private ArrayList<String> messages = new ArrayList<String>();
+	
+	private ListView pairedDeviceList;
+	private ListView otherDeviceList;
+	private ArrayAdapter<String> pairedDevAdapter;	
+	private ArrayAdapter<String> otherDevAdapter;
+	
+	private BluetoothAdapter adapter;
+	private Set<BluetoothDevice> devices;
+	private SharedPreferences preferences;
+	
+	final Context context = this;
+	private BluetoothDevice dev;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		mHandler = new Handler();
+		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		
-		ListView blv = (ListView) findViewById(R.id.deviceList);
-		devAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, devices);
-		blv.setAdapter(devAdapter);
+		// grab preferences and saved variables
+		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		
-		ListView mlv = (ListView) findViewById(R.id.messageList);
-		msgAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, messages);
-		mlv.setAdapter(msgAdapter);
+		adapter = BluetoothAdapter.getDefaultAdapter();
 		
-		ListView slv = (ListView) findViewById(R.id.statusList);
-		sAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, statuses);
-		slv.setAdapter(sAdapter);
-		
-		final Button sButton = (Button) findViewById(R.id.buttonServer);
-        final Button cButton = (Button) findViewById(R.id.buttonClient);
+		if (adapter == null)
+		{
+			// alert the user of incompatibility before closing (finishing) the app
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setMessage("Bluetooth is not supported on your device!")
+			       .setCancelable(false)
+			       .setPositiveButton("OK", new DialogInterface.OnClickListener()
+			       {
+			           public void onClick(DialogInterface dialog, int id)
+			           {
+			        	   finish();
+			           }
+			       });
+			AlertDialog alert = builder.create();
+			alert.show();
+		}
+		else
+		{			
+			//Toast.makeText(getApplicationContext(), "Welcome!", Toast.LENGTH_SHORT).show(); //for displaying popup message
+			setContentView(R.layout.activity_main);
+			
+			pairedDeviceList = (ListView) findViewById(R.id.pairedDeviceList);
+			pairedDevAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, pairedDevices);
+			pairedDeviceList.setAdapter(pairedDevAdapter);
+			
+			otherDeviceList = (ListView) findViewById(R.id.otherDeviceList);
+			otherDevAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, otherDevices);
+			otherDeviceList.setAdapter(otherDevAdapter);
+			
+			pairedDeviceList.setOnItemClickListener(new OnItemClickListener()
+			{
+				public void onItemClick(AdapterView<?> adapterView, View v, int position, long id)
+				{
+					setupConnection(v, position, pairedDevAdapter);
+				}
+			});
+			
+			otherDeviceList.setOnItemClickListener(new OnItemClickListener()
+			{
+				public void onItemClick(AdapterView<?> adapterView, View v, int position, long id)
+				{
+					setupConnection(v, position, otherDevAdapter);
+				}
+			});
+			
+			buttonFetch = (Button) findViewById(R.id.buttonFetch);
+			buttonFetch.setOnClickListener(new OnClickListener()
+			{
+				@Override
+				public void onClick(View v)
+				{
+					Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+					discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
+					startActivity(discoverableIntent);
+					
+					showPairedDevices(v);
+					searchDevices(v);
+				}
+			});
+		}
+	}
 
-        sButton.setOnClickListener(new View.OnClickListener()
-        {
-            public void onClick(View v)
-            {
-            	statuses.add("Accept Thread created");
-            	sAdapter.notifyDataSetChanged();
-            	AcceptThread at = new AcceptThread();
-            	at.start();
-				//cButton.setVisibility(View.INVISIBLE);
-				//sButton.setVisibility(View.INVISIBLE);
-            }
-        });
-        
-        cButton.setOnClickListener(new View.OnClickListener()
-        {
-			@Override
-			public void onClick(View v)
-			{
-				if (test != null)
-				{
-					statuses.add("Connect Thread created for " + test.getName());
-	            	sAdapter.notifyDataSetChanged();
-					ConnectThread ct = new ConnectThread(test);
-					ct.start();
-				}
-				else
-				{
-					statuses.add("Connect Thread could not be created");
-	            	sAdapter.notifyDataSetChanged();
-				}
-				//cButton.setVisibility(View.INVISIBLE);
-				//sButton.setVisibility(View.INVISIBLE);
-			}
-		});
-        
-        final Button mButton = (Button) findViewById(R.id.buttonMessage);
-        mButton.setOnClickListener(new View.OnClickListener()
-        {	
-			@Override
-			public void onClick(View v)
-			{
-				while (mHandler.hasMessages(MESSAGE_READ))
-				{
-					Message temp = mHandler.obtainMessage();
-					String msg = (String) temp.obj;
-					messages.add(msg);
-					msgAdapter.notifyDataSetChanged();
-					statuses.add("Message received: " + msg);
-	            	sAdapter.notifyDataSetChanged();
-	            }
-	            
-			}
-		});
-		
-        final Button sendButton = (Button) findViewById(R.id.buttonSend);
-        sendButton.setOnClickListener(new View.OnClickListener()
-        {	
-			@Override
-			public void onClick(View v)
-			{
-				if (connected)
-				{
-					statuses.add("Bytes sent");
-	            	sAdapter.notifyDataSetChanged();
-	            	bThread.write("Hello there".getBytes());
-				}
-			}
-		});
-		        
-		if (mBluetoothAdapter == null)
-		{
-			statuses.add("Bluetooth could not be found");
-        	sAdapter.notifyDataSetChanged();
-			return;
-		}
-		if (!mBluetoothAdapter.isEnabled())
-		{
-		    Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-		    startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-		}
-		
-		Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-		discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-		startActivity(discoverableIntent);
-		
-		devices.add("Available Devices");
-		mBluetoothAdapter.startDiscovery();
-		statuses.add("Started discovery");
-    	sAdapter.notifyDataSetChanged();
-		
-		// Register the BroadcastReceiver
-		IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-		registerReceiver(mReceiver, filter); // Don't forget to unregister during onDestroy
-	}
-	
 	@Override
-	protected void onDestroy()
+	public void onStart()
 	{
-		unregisterReceiver(mReceiver);
-		super.onDestroy();
+		super.onStart();
+		
+		// If BT is not on, request that it be enabled.
+		if (!adapter.isEnabled())
+		{
+			Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+			startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+		}
+		connection = new BluetoothConnection(this, mHandler);
+	}
+ 
+	@Override
+	public synchronized void onResume()
+	{
+		super.onResume();
+
+		// Performing this check in onResume() covers the case in which BT was
+		// not enabled during onStart(), so we were paused to enable it...
+		// onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
+		if (connection != null)
+		{
+			// Only if the state is STATE_NONE, do we know that we haven't started already
+			if (connection.getState() == BluetoothConnection.STATE_NONE)
+			{
+				connection.start();
+			}
+		}
+	}
+	
+	public void setDevice(BluetoothDevice device)
+	{
+		dev = device;
+	}
+	
+	public BluetoothDevice getDevice()
+	{
+		return dev;
+	}
+	
+	protected void setupConnection(View v, int position, ArrayAdapter<String> arrayAdapter)
+	{
+		// obtain mac address of clicked device
+		String deviceDescriptor = arrayAdapter.getItem(position);
+		int length = deviceDescriptor.length();
+		String mac = deviceDescriptor.substring(length-17, length);
+		
+		// reconstruct device using mac address
+		BluetoothDevice device = adapter.getRemoteDevice(mac);
+		setDevice(device);
+		
+		String name = device.getName();
+		if (name == null)
+		{
+			Toast.makeText(getApplicationContext(), "This device is nowhere to be found!", Toast.LENGTH_SHORT).show();
+		}
+		else
+		{
+			AlertDialog.Builder adb = new AlertDialog.Builder(context);
+			adb.setMessage("Connect to " + name + " ?")
+			.setCancelable(false)
+			.setPositiveButton("Accept", new DialogInterface.OnClickListener()
+			{
+		    	public void onClick(DialogInterface dialog, int id)
+		    	{
+		    		connection.connect(getDevice(), false);
+	    		}
+		    })
+	        .setNegativeButton("Decline", new DialogInterface.OnClickListener()
+	        {
+	        	public void onClick(DialogInterface dialog, int id)
+	        	{
+	        		dialog.cancel();
+	        	}
+	        });
+	        AlertDialog a = adb.create();
+	        a.show();
+		}
 	}
 	
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+	public void onDestroy()
+	{
+		super.onDestroy();
+		if (connection != null)
+			connection.stop();
+	}
+	
+	//not sure what to do with these functions; don't seem entirely necessary
+    private final void setStatus(int resId)
+    {
+        //final ActionBar actionBar = getActionBar();
+        //actionBar.setSubtitle(resId);
+        
+        //if (BluetoothMessage.actionBar != null)
+        //	BluetoothMessage.actionBar.setSubtitle(resId);
+    }
+
+    private final void setStatus(CharSequence subTitle)
+    {
+        //final ActionBar actionBar = getActionBar();
+        //actionBar.setSubtitle(subTitle);
+        
+        //if (BluetoothMessage.actionBar != null)
+        //	BluetoothMessage.actionBar.setSubtitle(subTitle);
+    }
+	
+	private final Handler mHandler = new Handler()
+	{
+        @Override
+        public void handleMessage(Message msg)
+        {
+            switch (msg.what)
+            {
+            case MESSAGE_STATE_CHANGE:
+                switch (msg.arg1)
+                {
+                case BluetoothConnection.STATE_CONNECTED:
+                    //setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
+                    break;
+                case BluetoothConnection.STATE_CONNECTING:
+                    //setStatus(R.string.title_connecting);
+                    break;
+                case BluetoothConnection.STATE_LISTEN:
+                case BluetoothConnection.STATE_NONE:
+                case BluetoothConnection.STATE_BUSY:
+                    //setStatus(R.string.title_not_connected);
+                    break;
+                }
+                break;
+            case MESSAGE_WRITE:
+                byte[] writeBuf = (byte[]) msg.obj;
+                // construct a string from the buffer
+                //String writeMessage = new String(writeBuf);
+                Intent intent_write = new Intent(getApplicationContext(), BluetoothMessage.class);
+                intent_write.putExtra("source", "Me");
+                intent_write.putExtra("buf", writeBuf);
+        		startActivity(intent_write);
+                break;
+            case MESSAGE_READ:
+                byte[] readBuf = (byte[]) msg.obj;
+                // construct a string from the valid bytes in the buffer
+                //String readMessage = new String(readBuf, 0, msg.arg1);
+                Intent intent_read = new Intent(getApplicationContext(), BluetoothMessage.class);
+                intent_read.putExtra("source", mConnectedDeviceName);
+                intent_read.putExtra("buf", readBuf);
+                intent_read.putExtra("size", msg.arg1);
+        		startActivity(intent_read);
+                break;
+            case MESSAGE_DEVICE_NAME:
+                // save the connected device's name
+                mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
+                Toast.makeText(getApplicationContext(), "Connected to " + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
+                BluetoothMessage.myConnection = connection;
+                BluetoothMessage.myAdapter = adapter;
+        		Intent intent_new = new Intent(getApplicationContext(), BluetoothMessage.class);
+        		startActivity(intent_new);
+        		break;
+            case MESSAGE_TOAST:
+                Toast.makeText(getApplicationContext(), msg.getData().getString(TOAST), Toast.LENGTH_SHORT).show();
+                break;
+            }
+        }
+    };
+	
+	protected void toggleBluetooth(View v)
+	{
+		if(!adapter.isEnabled())
+		{
+			// if adapter is not enabled, start Bluetooth
+			Intent intent = new Intent(adapter.ACTION_REQUEST_ENABLE);
+			startActivityForResult(intent, REQUEST_ENABLE_BT);
+		}
+		else
+		{
+			// otherwise, Bluetooth is enabled, so we disable it
+			adapter.disable();
+		}
+		
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data)
+	{
+		if(requestCode==REQUEST_ENABLE_BT)
+		{
+			//if we want to do something
+		}
+	}
+	
+	protected void showPairedDevices(View v)
+	{
+		devices = adapter.getBondedDevices();
+		pairedDevAdapter.clear();
+		
+		for (BluetoothDevice d : devices)
+		{
+			pairedDevAdapter.add(d.getName() + "\n" + d.getAddress());
+		}
+			
+	}
+	
+	final BroadcastReceiver receiver = new BroadcastReceiver()
+	{
+		public void onReceive(Context context, Intent intent)
+		{
+			String action = intent.getAction();
+			otherDevAdapter.clear();
+			
+			if (BluetoothDevice.ACTION_FOUND.equals(action))
+			{
+				BluetoothDevice d = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+				otherDevAdapter.add(d.getName() + "\n" + d.getAddress());
+				otherDevAdapter.notifyDataSetChanged();
+			}	
+		}
+	};
+	
+	protected void searchDevices(View v)
+	{
+		if(adapter.isDiscovering())
+		{
+			adapter.cancelDiscovery();
+		}
+		else
+		{
+			otherDevAdapter.clear();
+			adapter.startDiscovery();
+			registerReceiver(receiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+		}
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu)
+	{
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
 
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item)
+	{
 		// Handle action bar item clicks here. The action bar will
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
+		/*
 		int id = item.getItemId();
-		if (id == R.id.action_settings) {
+		
+		if (id == R.id.action_settings)
+		{
+			// start settings intent
+			Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+			startActivity(intent);
+			
+			String name = preferences.getString("prefScreenName", "ClassChatter");
+			String time = preferences.getString("prefDiscoverableTime", "120");
+			
+			if(time.equals("0"))
+			{
+				Toast.makeText(getApplicationContext(), "Hello " + name + "!\n"
+						+ "After clicking \"Go Visible\", you will currently be indefinitely discoverable.", Toast.LENGTH_SHORT).show();
+			}
+			
+			Toast.makeText(getApplicationContext(), "Hello " + name + "!\n"
+					+ "After clicking \"Go Visible\", you will currently be discoverable for "+ time + " seconds.", Toast.LENGTH_SHORT).show();			
+			
 			return true;
 		}
+		*/
 		return super.onOptionsItemSelected(item);
 	}
-	
-	private class AcceptThread extends Thread {
-		private final BluetoothServerSocket mmServerSocket;
-	 
-	    public AcceptThread() {
-	        // Use a temporary object that is later assigned to mmServerSocket,
-	        // because mmServerSocket is final
-	        BluetoothServerSocket tmp = null;
-	        try {
-	            // MY_UUID is the app's UUID string, also used by the client code
-	            tmp = mBluetoothAdapter.listenUsingRfcommWithServiceRecord("Whyyy", MY_UUID);
-	        }
-	        catch (IOException e) {
-	        	//statuses.add("Error: Unable to connect, " + e.getMessage());
-            	//sAdapter.notifyDataSetChanged();
-            	//final Button sButton = (Button) findViewById(R.id.buttonServer);
-                //final Button cButton = (Button) findViewById(R.id.buttonClient);
-				//cButton.setVisibility(View.VISIBLE);
-				//sButton.setVisibility(View.VISIBLE);
-	        }
-	        mmServerSocket = tmp;
-	    }
-	 
-	    public void run() {
-	        BluetoothSocket socket = null;
-	        // Keep listening until exception occurs or a socket is returned
-	        while (true)
-	        {
-	            try {
-	            	socket = mmServerSocket.accept();
-	            } catch (IOException e) {
-	            	//statuses.add("Error: Unable to connect, " + e.getMessage());
-	            	//sAdapter.notifyDataSetChanged();
-	            	break;
-	            }
-	            // If a connection was accepted
-	            if (socket != null) {
-	                // Do work to manage the connection (in a separate thread)
-	            	//statuses.add("Connected to " + socket.getRemoteDevice().getName());
-	            	//sAdapter.notifyDataSetChanged();
-	            	bThread = new ConnectedThread(socket);
-	            	bThread.start();
-	                connected = true;
-	                try {
-	                	//statuses.add("Trying to close server socket");
-		            	//sAdapter.notifyDataSetChanged();
-						mmServerSocket.close();
-					} catch (IOException e) {
-						//statuses.add("Error: Could not close socket, " + e.getMessage());
-						//sAdapter.notifyDataSetChanged();
-					}
-	                break;
-	            }
-	        }
-	    }
-	 
-	    /** Will cancel the listening socket, and cause the thread to finish */
-	    public void cancel() {
-	        try {
-	            mmServerSocket.close();
-	        } catch (IOException e) { }
-	    }
-	}
-
-	private class ConnectThread extends Thread {
-	    private final BluetoothSocket mmSocket;
-	    private final BluetoothDevice mmDevice;
-	 
-	    public ConnectThread(BluetoothDevice device) {
-	        // Use a temporary object that is later assigned to mmSocket,
-	        // because mmSocket is final
-	        BluetoothSocket tmp = null;
-	        mmDevice = device;
-	 
-	        // Get a BluetoothSocket to connect with the given BluetoothDevice
-	        try {
-	            // MY_UUID is the app's UUID string, also used by the server code
-	            tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
-	        } catch (IOException e){ 
-	        	//statuses.add("Error: Unable to create socket, " + e.getMessage());
-            	//sAdapter.notifyDataSetChanged();
-            }
-	        mmSocket = tmp;
-	        //statuses.add("Socket created for " + tmp.getRemoteDevice().getName());
-	        //sAdapter.notifyDataSetChanged();
-	    }
-	 
-	    public void run() {
-	        // Cancel discovery because it will slow down the connection
-	        mBluetoothAdapter.cancelDiscovery();
-	 
-	        try {
-	            // Connect the device through the socket. This will block
-	            // until it succeeds or throws an exception
-	            mmSocket.connect();
-	        }
-	        catch (IOException connectException)
-	        {
-	            // Unable to connect; close the socket and get out
-	        	//statuses.add("Error: Unable to connect, " + connectException.getMessage());
-            	//sAdapter.notifyDataSetChanged();
-            	//final Button sButton = (Button) findViewById(R.id.buttonServer);
-                //final Button cButton = (Button) findViewById(R.id.buttonClient);
-				//cButton.setVisibility(View.VISIBLE);
-				//sButton.setVisibility(View.VISIBLE);
-            	try {
-	                mmSocket.close();
-	            } catch (IOException closeException) { }
-	            return;
-	        }
-	 
-	        // Do work to manage the connection (in a separate thread)
-	        bThread = new ConnectedThread(mmSocket);
-	        bThread.start();
-	        connected = true;
-	    }
-	 
-	    /** Will cancel an in-progress connection, and close the socket */
-	    public void cancel() {
-	        try {            	
-	            mmSocket.close();
-	            connected = false;
-	        } catch (IOException e) { }
-	    }
-	}
-	
-	private class ConnectedThread extends Thread {
-	    private final BluetoothSocket mmSocket;
-	    private final InputStream mmInStream;
-	    private final OutputStream mmOutStream;
-	 
-	    public ConnectedThread(BluetoothSocket socket) {
-	        mmSocket = socket;
-	        InputStream tmpIn = null;
-	        OutputStream tmpOut = null;
-	 
-	        // Get the input and output streams, using temp objects because
-	        // member streams are final
-	        try {
-	            tmpIn = socket.getInputStream();
-	            tmpOut = socket.getOutputStream();
-	        } catch (IOException e) { }
-	 
-	        mmInStream = tmpIn;
-	        mmOutStream = tmpOut;
-	    }
-	 
-	    public void run() {
-	        byte[] buffer = new byte[1024];  // buffer store for the stream
-	        int bytes; // bytes returned from read()
-	 
-	        // Keep listening to the InputStream until an exception occurs
-	        while (true) {
-	            try {
-	                // Read from the InputStream
-	                bytes = mmInStream.read(buffer);
-	                // Send the obtained bytes to the UI activity
-	                mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer)
-	                        .sendToTarget();
-	            } catch (IOException e) {
-	                break;
-	            }
-	        }
-	    }
-	 
-	    /* Call this from the main activity to send data to the remote device */
-	    public void write(byte[] bytes) {
-	        try {
-	            mmOutStream.write(bytes);
-	        } catch (IOException e) { }
-	    }
-	 
-	    /* Call this from the main activity to shutdown the connection */
-	    public void cancel() {
-	        try {
-	            mmSocket.close();
-	            connected = false;
-	        } catch (IOException e) { }
-	    }
-	}
-	
 }
+
