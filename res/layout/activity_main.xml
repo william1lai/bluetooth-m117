@@ -8,11 +8,22 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.bluetoothtest.MainActivity" >
 
+    <TextView
+        android:id="@+id/head"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Set your preferences"
+        android:textSize="24dp"
+        android:textStyle="bold" />
+    
     <LinearLayout
         android:id="@+id/lv1"
         android:layout_width="fill_parent"
     	android:layout_height="wrap_content"
+    	android:layout_below="@+id/head"
     	android:orientation="horizontal"
+    	android:layout_marginTop="20dp"
     	android:weightSum="100" >
         
 	    <TextView
@@ -198,15 +209,5 @@
 	        android:layout_weight="92"
 	        android:max="100" />
     </LinearLayout>
-                            	
-    
-    <Button
-        android:id="@+id/buttonSubmit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/lv8"
-        android:layout_marginTop="25dp"
-        android:layout_centerInParent="true"
-        android:text="Submit" />
     
 </RelativeLayout>
