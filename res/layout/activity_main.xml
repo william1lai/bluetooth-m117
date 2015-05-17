@@ -8,25 +8,205 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.bluetoothtest.MainActivity" >
 
-    <ListView
-        android:id="@+id/pairedDeviceList"
-        android:layout_width="wrap_content"
-        android:layout_height="180dp" />
-    
-    <ListView
-        android:id="@+id/otherDeviceList"
-        android:layout_width="wrap_content"
-        android:layout_height="180dp"
-        android:layout_below="@+id/pairedDeviceList"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="185dp" />
+    <LinearLayout
+        android:id="@+id/lv1"
+        android:layout_width="fill_parent"
+    	android:layout_height="wrap_content"
+    	android:orientation="horizontal"
+    	android:weightSum="100" >
+        
+	    <TextView
+	        android:id="@+id/textCat1"
+	        android:layout_width="wrap_content"
+	        android:layout_height="fill_parent"
+	        android:layout_marginLeft="25dp"
+	        android:layout_weight="8"
+	        android:text="Category 1" />
+	        
+	    <SeekBar
+	        android:id="@+id/sb1"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="92"
+	        android:max="100" />
+    </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/lv2"
+        android:layout_width="fill_parent"
+    	android:layout_height="wrap_content"
+    	android:layout_below="@+id/lv1"
+    	android:orientation="horizontal"
+    	android:weightSum="100" >
+        
+	    <TextView
+	        android:id="@+id/textCat2"
+	        android:layout_width="wrap_content"
+	        android:layout_height="fill_parent"
+	        android:layout_marginLeft="25dp"
+	        android:layout_weight="8"
+	        android:text="Category 2" />
+	        
+	    <SeekBar
+	        android:id="@+id/sb2"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="92"
+	        android:max="100" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/lv3"
+        android:layout_width="fill_parent"
+    	android:layout_height="wrap_content"
+    	android:layout_below="@+id/lv2"
+    	android:orientation="horizontal"
+    	android:weightSum="100" >
+        
+	    <TextView
+	        android:id="@+id/textCat3"
+	        android:layout_width="wrap_content"
+	        android:layout_height="fill_parent"
+	        android:layout_marginLeft="25dp"
+	        android:layout_weight="8"
+	        android:text="Category 3" />
+	        
+	    <SeekBar
+	        android:id="@+id/sb3"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="92"
+	        android:max="100" />
+    </LinearLayout>
+        
+    <LinearLayout
+		android:id="@+id/lv4"
+        android:layout_width="fill_parent"
+    	android:layout_height="wrap_content"
+    	android:layout_below="@+id/lv3"
+    	android:orientation="horizontal"
+    	android:weightSum="100" >
+                
+	    <TextView
+	        android:id="@+id/textCat4"
+	        android:layout_width="wrap_content"
+	        android:layout_height="fill_parent"
+	        android:layout_marginLeft="25dp"
+	        android:layout_weight="8"
+	        android:text="Category 4" />
+	        
+	    <SeekBar
+	        android:id="@+id/sb4"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="92"
+	        android:max="100" />
+    </LinearLayout>
+
+    <LinearLayout
+		android:id="@+id/lv5"
+        android:layout_width="fill_parent"
+    	android:layout_height="wrap_content"
+    	android:layout_below="@+id/lv4"
+    	android:orientation="horizontal"
+    	android:weightSum="100" >
+                
+	    <TextView
+	        android:id="@+id/textCat5"
+	        android:layout_width="wrap_content"
+	        android:layout_height="fill_parent"
+	        android:layout_marginLeft="25dp"
+	        android:layout_weight="8"
+	        android:text="Category 5" />
+	        
+	    <SeekBar
+	        android:id="@+id/sb5"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="92"
+	        android:max="100" />
+    </LinearLayout>
+                
+    <LinearLayout
+		android:id="@+id/lv6"
+        android:layout_width="fill_parent"
+    	android:layout_height="wrap_content"
+    	android:layout_below="@+id/lv5"
+    	android:orientation="horizontal"
+    	android:weightSum="100" >
+                
+	    <TextView
+	        android:id="@+id/textCat6"
+	        android:layout_width="wrap_content"
+	        android:layout_height="fill_parent"
+	        android:layout_marginLeft="25dp"
+	        android:layout_weight="8"
+	        android:text="Category 6" />
+	        
+	    <SeekBar
+	        android:id="@+id/sb6"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="92"
+	        android:max="100" />
+    </LinearLayout>
+                    
+    <LinearLayout
+		android:id="@+id/lv7"
+        android:layout_width="fill_parent"
+    	android:layout_height="wrap_content"
+    	android:layout_below="@+id/lv6"
+    	android:orientation="horizontal"
+    	android:weightSum="100" >
+                
+	    <TextView
+	        android:id="@+id/textCat7"
+	        android:layout_width="wrap_content"
+	        android:layout_height="fill_parent"
+	        android:layout_marginLeft="25dp"
+	        android:layout_weight="8"
+	        android:text="Category 7" />
+	        
+	    <SeekBar
+	        android:id="@+id/sb7"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="92"
+	        android:max="100" />
+    </LinearLayout>
+                        
+    <LinearLayout
+		android:id="@+id/lv8"
+        android:layout_width="fill_parent"
+    	android:layout_height="wrap_content"
+    	android:layout_below="@+id/lv7"
+    	android:orientation="horizontal"
+    	android:weightSum="100" >
+                
+	    <TextView
+	        android:id="@+id/textCat8"
+	        android:layout_width="wrap_content"
+	        android:layout_height="fill_parent"
+	        android:layout_marginLeft="25dp"
+	        android:layout_weight="8"
+	        android:text="Category 8" />
+	        
+	    <SeekBar
+	        android:id="@+id/sb8"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="92"
+	        android:max="100" />
+    </LinearLayout>
+                            	
+    
     <Button
-        android:id="@+id/buttonFetch"
+        android:id="@+id/buttonSubmit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/otherDeviceList"
-        android:layout_marginTop="10dp"
-        android:text="Fetch Devices" />
+        android:layout_below="@+id/lv8"
+        android:layout_marginTop="25dp"
+        android:layout_centerInParent="true"
+        android:text="Submit" />
     
 </RelativeLayout>

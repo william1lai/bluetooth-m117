@@ -1,32 +1,23 @@
 package com.example.bluetoothtest;
 
-import java.util.ArrayList;
-import java.util.Set;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 // Bluetooth implementation based on http://examples.javacodegeeks.com/android/core/bluetooth/bluetoothadapter/android-bluetooth-example/
@@ -50,29 +41,18 @@ public class MainActivity extends Activity
     public static String EXTRA_DEVICE_ADDRESS = "device_address";
     
 	// VIEW AND LAYOUT
-    private Button buttonFetch;
-	private Button buttonSend;
-	
+    private Button buttonSubmit;
+    private SeekBar sb1, sb2, sb3, sb4, sb5, sb6, sb7, sb8;
+    private int c1, c2, c3, c4, c5, c6, c7, c8;
+    
 	// COMMUNICATION VARIABLES
 	private BluetoothConnection connection;
 	private String mConnectedDeviceName = null;
-	private StringBuffer mOutStringBuffer;
-	
-	private ArrayList<String> pairedDevices = new ArrayList<String>();
-	private ArrayList<String> otherDevices = new ArrayList<String>();
-	//private ArrayList<String> messages = new ArrayList<String>();
-	
-	private ListView pairedDeviceList;
-	private ListView otherDeviceList;
-	private ArrayAdapter<String> pairedDevAdapter;	
-	private ArrayAdapter<String> otherDevAdapter;
-	
 	private BluetoothAdapter adapter;
-	private Set<BluetoothDevice> devices;
-	private SharedPreferences preferences;
-	
 	final Context context = this;
 	private BluetoothDevice dev;
+	
+	public static final int numCats = 8;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -80,7 +60,6 @@ public class MainActivity extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-		preferences = PreferenceManager.getDefaultSharedPreferences(this);
 		adapter = BluetoothAdapter.getDefaultAdapter();
 		
 		if (adapter == null)
@@ -100,46 +79,154 @@ public class MainActivity extends Activity
 			alert.show();
 		}
 		else
-		{			
-			//Toast.makeText(getApplicationContext(), "Welcome!", Toast.LENGTH_SHORT).show(); //for displaying popup message
+		{
 			setContentView(R.layout.activity_main);
 			
-			pairedDeviceList = (ListView) findViewById(R.id.pairedDeviceList);
-			pairedDevAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, pairedDevices);
-			pairedDeviceList.setAdapter(pairedDevAdapter);
-			
-			otherDeviceList = (ListView) findViewById(R.id.otherDeviceList);
-			otherDevAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, otherDevices);
-			otherDeviceList.setAdapter(otherDevAdapter);
-			
-			pairedDeviceList.setOnItemClickListener(new OnItemClickListener()
-			{
-				public void onItemClick(AdapterView<?> adapterView, View v, int position, long id)
-				{
-					setupConnection(v, position, pairedDevAdapter);
-				}
-			});
-			
-			otherDeviceList.setOnItemClickListener(new OnItemClickListener()
-			{
-				public void onItemClick(AdapterView<?> adapterView, View v, int position, long id)
-				{
-					setupConnection(v, position, otherDevAdapter);
-				}
-			});
-			
-			buttonFetch = (Button) findViewById(R.id.buttonFetch);
-			buttonFetch.setOnClickListener(new OnClickListener()
+			Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+			discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 0); //make discoverable forever
+			startActivity(discoverableIntent);
+
+			sb1 = (SeekBar) findViewById(R.id.sb1);
+			sb2 = (SeekBar) findViewById(R.id.sb2);
+			sb3 = (SeekBar) findViewById(R.id.sb3);
+			sb4 = (SeekBar) findViewById(R.id.sb4);
+			sb5 = (SeekBar) findViewById(R.id.sb5);
+			sb6 = (SeekBar) findViewById(R.id.sb6);
+			sb7 = (SeekBar) findViewById(R.id.sb7);
+			sb8 = (SeekBar) findViewById(R.id.sb8);
+
+			sb1.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+	        {
+				@Override
+	            public void onStopTrackingTouch(SeekBar bar)
+	            {
+					c1 = bar.getProgress();
+	            }
+
+				@Override
+				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}
+
+				@Override
+				public void onStartTrackingTouch(SeekBar seekBar) {}
+	        });
+
+			sb2.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+	        {			
+				@Override
+	            public void onStopTrackingTouch(SeekBar bar)
+	            {
+	            	c2 = bar.getProgress();
+	            }
+
+				@Override
+				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}
+
+				@Override
+				public void onStartTrackingTouch(SeekBar seekBar) {}
+	        });
+
+			sb3.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+	        {
+				@Override
+	            public void onStopTrackingTouch(SeekBar bar)
+	            {
+	            	c3 = bar.getProgress();
+	            }
+
+				@Override
+				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}
+
+				@Override
+				public void onStartTrackingTouch(SeekBar seekBar) {}
+	        });
+
+			sb4.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+	        {
+				@Override
+	            public void onStopTrackingTouch(SeekBar bar)
+	            {
+	            	c4 = bar.getProgress();
+	            }
+
+				@Override
+				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}
+
+				@Override
+				public void onStartTrackingTouch(SeekBar seekBar) {}
+	        });
+
+			sb5.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+	        {
+				@Override
+	            public void onStopTrackingTouch(SeekBar bar)
+	            {
+	            	c5 = bar.getProgress();
+	            }
+
+				@Override
+				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}
+
+				@Override
+				public void onStartTrackingTouch(SeekBar seekBar) {}
+	        });
+
+			sb6.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+	        {
+				@Override
+	            public void onStopTrackingTouch(SeekBar bar)
+	            {
+	            	c6 = bar.getProgress();
+	            }
+
+				@Override
+				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}
+
+				@Override
+				public void onStartTrackingTouch(SeekBar seekBar) {}
+	        });
+
+			sb7.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+	        {
+				@Override
+	            public void onStopTrackingTouch(SeekBar bar)
+	            {
+	            	c7 = bar.getProgress();
+	            }
+
+				@Override
+				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}
+
+				@Override
+				public void onStartTrackingTouch(SeekBar seekBar) {}
+	        });
+
+			sb8.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+	        {
+				@Override
+	            public void onStopTrackingTouch(SeekBar bar)
+	            {
+					c8 = bar.getProgress();
+	            }
+
+				@Override
+				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}
+
+				@Override
+				public void onStartTrackingTouch(SeekBar seekBar) {}
+	        });
+
+			buttonSubmit = (Button) findViewById(R.id.buttonSubmit);
+			buttonSubmit.setOnClickListener(new OnClickListener()
 			{
 				@Override
 				public void onClick(View v)
 				{
-					Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-					discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-					startActivity(discoverableIntent);
+					String name = String.valueOf(c1) + "-" + String.valueOf(c2) + "-" + String.valueOf(c3) + "-" + String.valueOf(c4) +
+							"-" + String.valueOf(c5) + "-" + String.valueOf(c6) + "-" + String.valueOf(c7) + "-" + String.valueOf(c8);
 					
-					showPairedDevices(v);
-					searchDevices(v);
+					adapter.setName(name);
+					Toast t = Toast.makeText(context, name, Toast.LENGTH_LONG);
+					t.show();
 				}
 			});
 		}
@@ -235,25 +322,6 @@ public class MainActivity extends Activity
 			connection.stop();
 	}
 	
-	//not sure what to do with these functions; don't seem entirely necessary
-    private final void setStatus(int resId)
-    {
-        //final ActionBar actionBar = getActionBar();
-        //actionBar.setSubtitle(resId);
-        
-        //if (BluetoothMessage.actionBar != null)
-        //	BluetoothMessage.actionBar.setSubtitle(resId);
-    }
-
-    private final void setStatus(CharSequence subTitle)
-    {
-        //final ActionBar actionBar = getActionBar();
-        //actionBar.setSubtitle(subTitle);
-        
-        //if (BluetoothMessage.actionBar != null)
-        //	BluetoothMessage.actionBar.setSubtitle(subTitle);
-    }
-	
 	private final Handler mHandler = new Handler()
 	{
         @Override
@@ -261,22 +329,6 @@ public class MainActivity extends Activity
         {
             switch (msg.what)
             {
-            case MESSAGE_STATE_CHANGE:
-                switch (msg.arg1)
-                {
-                case BluetoothConnection.STATE_CONNECTED:
-                    //setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
-                    break;
-                case BluetoothConnection.STATE_CONNECTING:
-                    //setStatus(R.string.title_connecting);
-                    break;
-                case BluetoothConnection.STATE_LISTEN:
-                case BluetoothConnection.STATE_NONE:
-                case BluetoothConnection.STATE_BUSY:
-                    //setStatus(R.string.title_not_connected);
-                    break;
-                }
-                break;
             case MESSAGE_WRITE:
                 byte[] writeBuf = (byte[]) msg.obj;
                 // construct a string from the buffer
@@ -337,49 +389,7 @@ public class MainActivity extends Activity
 		}
 	}
 	
-	protected void showPairedDevices(View v)
-	{
-		devices = adapter.getBondedDevices();
-		pairedDevAdapter.clear();
-		
-		for (BluetoothDevice d : devices)
-		{
-			pairedDevAdapter.add(d.getName() + "\n" + d.getAddress());
-		}
-			
-	}
-	
-	final BroadcastReceiver receiver = new BroadcastReceiver()
-	{
-		public void onReceive(Context context, Intent intent)
-		{
-			String action = intent.getAction();
-			otherDevAdapter.clear();
-			
-			if (BluetoothDevice.ACTION_FOUND.equals(action))
-			{
-				BluetoothDevice d = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-				otherDevAdapter.add(d.getName() + "\n" + d.getAddress());
-				otherDevAdapter.notifyDataSetChanged();
-			}	
-		}
-	};
-	
-	protected void searchDevices(View v)
-	{
-		if(adapter.isDiscovering())
-		{
-			adapter.cancelDiscovery();
-		}
-		else
-		{
-			otherDevAdapter.clear();
-			adapter.startDiscovery();
-			registerReceiver(receiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
-		}
-	}
-
-	@Override
+		@Override
 	public boolean onCreateOptionsMenu(Menu menu)
 	{
 		// Inflate the menu; this adds items to the action bar if it is present.
@@ -390,33 +400,6 @@ public class MainActivity extends Activity
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item)
 	{
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		/*
-		int id = item.getItemId();
-		
-		if (id == R.id.action_settings)
-		{
-			// start settings intent
-			Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
-			startActivity(intent);
-			
-			String name = preferences.getString("prefScreenName", "ClassChatter");
-			String time = preferences.getString("prefDiscoverableTime", "120");
-			
-			if(time.equals("0"))
-			{
-				Toast.makeText(getApplicationContext(), "Hello " + name + "!\n"
-						+ "After clicking \"Go Visible\", you will currently be indefinitely discoverable.", Toast.LENGTH_SHORT).show();
-			}
-			
-			Toast.makeText(getApplicationContext(), "Hello " + name + "!\n"
-					+ "After clicking \"Go Visible\", you will currently be discoverable for "+ time + " seconds.", Toast.LENGTH_SHORT).show();			
-			
-			return true;
-		}
-		*/
 		return super.onOptionsItemSelected(item);
 	}
 }
