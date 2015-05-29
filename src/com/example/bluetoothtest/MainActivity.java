@@ -47,9 +47,9 @@ public class MainActivity extends Activity {
 	private Button buttonSubmit;
 	private SeekBar sb1, sb2, sb3, sb4, sb5, sb6, sb7, sb8;
 	private int c1, c2, c3, c4, c5, c6, c7, c8;
-	private String n1 = "Category1", n2 = "Category2", n3 = "Category3",
-			n4 = "Category4", n5 = "Category5", n6 = "Category6",
-			n7 = "Category7", n8 = "Category8";
+	private String n1 = "a", n2 = "b", n3 = "c",
+			n4 = "d", n5 = "e", n6 = "f",
+			n7 = "g", n8 = "h";
 
 	// COMMUNICATION VARIABLES
 	private BluetoothConnection connection;
@@ -252,10 +252,13 @@ public class MainActivity extends Activity {
 							else
 								name = n8;
 						}
+						name = "HM01" + adapter.getAddress() + name;
 						adapter.setName(name);
+						/*
 						Toast t = Toast.makeText(context, name,
 								Toast.LENGTH_LONG);
 						t.show();
+						*/
 					}
 				});
 			}

@@ -28,17 +28,17 @@
         
 	    <TextView
 	        android:id="@+id/textCat1"
-	        android:layout_width="wrap_content"
+	        android:layout_width="0dp"
 	        android:layout_height="fill_parent"
 	        android:layout_marginLeft="25dp"
-	        android:layout_weight="8"
-	        android:text="Category 1" />
+	        android:layout_weight="40"
+	        android:text="Anime" />
 	        
 	    <SeekBar
 	        android:id="@+id/sb1"
-	        android:layout_width="wrap_content"
+	        android:layout_width="0dp"
 	        android:layout_height="wrap_content"
-	        android:layout_weight="92"
+	        android:layout_weight="60"
 	        android:max="100" />
     </LinearLayout>
 
@@ -48,21 +48,22 @@
     	android:layout_height="wrap_content"
     	android:layout_below="@+id/lv1"
     	android:orientation="horizontal"
+    	android:layout_marginTop="10dp"
     	android:weightSum="100" >
         
 	    <TextView
 	        android:id="@+id/textCat2"
-	        android:layout_width="wrap_content"
+	        android:layout_width="0dp"
 	        android:layout_height="fill_parent"
 	        android:layout_marginLeft="25dp"
-	        android:layout_weight="8"
-	        android:text="Category 2" />
+	        android:layout_weight="40"
+	        android:text="Automobiles" />
 	        
 	    <SeekBar
 	        android:id="@+id/sb2"
-	        android:layout_width="wrap_content"
+	        android:layout_width="0dp"
 	        android:layout_height="wrap_content"
-	        android:layout_weight="92"
+	        android:layout_weight="60"
 	        android:max="100" />
     </LinearLayout>
 
@@ -72,21 +73,22 @@
     	android:layout_height="wrap_content"
     	android:layout_below="@+id/lv2"
     	android:orientation="horizontal"
+    	android:layout_marginTop="10dp"
     	android:weightSum="100" >
         
 	    <TextView
 	        android:id="@+id/textCat3"
-	        android:layout_width="wrap_content"
+	        android:layout_width="0dp"
 	        android:layout_height="fill_parent"
 	        android:layout_marginLeft="25dp"
-	        android:layout_weight="8"
-	        android:text="Category 3" />
+	        android:layout_weight="40"
+	        android:text="Movies" />
 	        
 	    <SeekBar
 	        android:id="@+id/sb3"
-	        android:layout_width="wrap_content"
+	        android:layout_width="0dp"
 	        android:layout_height="wrap_content"
-	        android:layout_weight="92"
+	        android:layout_weight="60"
 	        android:max="100" />
     </LinearLayout>
         
@@ -96,21 +98,22 @@
     	android:layout_height="wrap_content"
     	android:layout_below="@+id/lv3"
     	android:orientation="horizontal"
+    	android:layout_marginTop="10dp"
     	android:weightSum="100" >
                 
 	    <TextView
 	        android:id="@+id/textCat4"
-	        android:layout_width="wrap_content"
+	        android:layout_width="0dp"
 	        android:layout_height="fill_parent"
 	        android:layout_marginLeft="25dp"
-	        android:layout_weight="8"
-	        android:text="Category 4" />
+	        android:layout_weight="40"
+	        android:text="Music" />
 	        
 	    <SeekBar
 	        android:id="@+id/sb4"
-	        android:layout_width="wrap_content"
+	        android:layout_width="0dp"
 	        android:layout_height="wrap_content"
-	        android:layout_weight="92"
+	        android:layout_weight="60"
 	        android:max="100" />
     </LinearLayout>
 
@@ -120,21 +123,22 @@
     	android:layout_height="wrap_content"
     	android:layout_below="@+id/lv4"
     	android:orientation="horizontal"
+    	android:layout_marginTop="10dp"
     	android:weightSum="100" >
                 
 	    <TextView
 	        android:id="@+id/textCat5"
-	        android:layout_width="wrap_content"
+	        android:layout_width="0dp"
 	        android:layout_height="fill_parent"
 	        android:layout_marginLeft="25dp"
-	        android:layout_weight="8"
-	        android:text="Category 5" />
+	        android:layout_weight="40"
+	        android:text="Politics" />
 	        
 	    <SeekBar
 	        android:id="@+id/sb5"
-	        android:layout_width="wrap_content"
+	        android:layout_width="0dp"
 	        android:layout_height="wrap_content"
-	        android:layout_weight="92"
+	        android:layout_weight="60"
 	        android:max="100" />
     </LinearLayout>
                 
@@ -144,21 +148,22 @@
     	android:layout_height="wrap_content"
     	android:layout_below="@+id/lv5"
     	android:orientation="horizontal"
+    	android:layout_marginTop="10dp"
     	android:weightSum="100" >
                 
 	    <TextView
 	        android:id="@+id/textCat6"
-	        android:layout_width="wrap_content"
+	        android:layout_width="0dp"
 	        android:layout_height="fill_parent"
 	        android:layout_marginLeft="25dp"
-	        android:layout_weight="8"
-	        android:text="Category 6" />
+	        android:layout_weight="40"
+	        android:text="Sports" />
 	        
 	    <SeekBar
 	        android:id="@+id/sb6"
-	        android:layout_width="wrap_content"
+	        android:layout_width="0dp"
 	        android:layout_height="wrap_content"
-	        android:layout_weight="92"
+	        android:layout_weight="60"
 	        android:max="100" />
     </LinearLayout>
                     
@@ -168,21 +173,22 @@
     	android:layout_height="wrap_content"
     	android:layout_below="@+id/lv6"
     	android:orientation="horizontal"
+    	android:layout_marginTop="10dp"
     	android:weightSum="100" >
                 
 	    <TextView
 	        android:id="@+id/textCat7"
-	        android:layout_width="wrap_content"
+	        android:layout_width="0dp"
 	        android:layout_height="fill_parent"
 	        android:layout_marginLeft="25dp"
-	        android:layout_weight="8"
-	        android:text="Category 7" />
+	        android:layout_weight="40"
+	        android:text="Technology" />
 	        
 	    <SeekBar
 	        android:id="@+id/sb7"
-	        android:layout_width="wrap_content"
+	        android:layout_width="0dp"
 	        android:layout_height="wrap_content"
-	        android:layout_weight="92"
+	        android:layout_weight="60"
 	        android:max="100" />
     </LinearLayout>
                         
@@ -192,21 +198,22 @@
     	android:layout_height="wrap_content"
     	android:layout_below="@+id/lv7"
     	android:orientation="horizontal"
+    	android:layout_marginTop="10dp"
     	android:weightSum="100" >
                 
 	    <TextView
 	        android:id="@+id/textCat8"
-	        android:layout_width="wrap_content"
+	        android:layout_width="0dp"
 	        android:layout_height="fill_parent"
 	        android:layout_marginLeft="25dp"
-	        android:layout_weight="8"
-	        android:text="Category 8" />
+	        android:layout_weight="40"
+	        android:text="Video Games" />
 	        
 	    <SeekBar
 	        android:id="@+id/sb8"
-	        android:layout_width="wrap_content"
+	        android:layout_width="0dp"
 	        android:layout_height="wrap_content"
-	        android:layout_weight="92"
+	        android:layout_weight="60"
 	        android:max="100" />
     </LinearLayout>
     
